@@ -1,4 +1,4 @@
-package com.example.googlemapactivity;
+package com.example.googlemapdemo;
 
 import org.junit.Test;
 
