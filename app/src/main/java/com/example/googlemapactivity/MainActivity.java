@@ -1,6 +1,9 @@
 package com.example.googlemapactivity;
 
 import android.os.Bundle;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.Spinner;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -21,6 +24,29 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.id_map);
         mapFragment.getMapAsync(this);
+        Spinner mapTypeSpinner = findViewById(R.id.mapTypeSpinner);
+        mapTypeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if (mMap != null) {
+                    switch (position) {
+                        case 0:
+                            mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+                            break;
+                        case 1:
+                            mMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
+                            break;
+                        case 2:
+                            mMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
+                            break;
+                    }
+                }
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                // Do nothing
+            }
+        });
     }
 
     @Override
