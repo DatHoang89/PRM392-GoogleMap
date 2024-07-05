@@ -99,15 +99,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             return;
         }
         Task<Location> task = fusedLocationProviderClient.getLastLocation();
-        task.addOnSuccessListener(new OnSuccessListener<Location>() {
-            @Override
-            public void onSuccess(Location location) {
-                if (location != null) {
-                    currentLocation = location;
+        task.addOnSuccessListener(location -> {
+            if (location != null) {
+                currentLocation = location;
 
-                    SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.id_map);
-                    mapFragment.getMapAsync(MainActivity.this);
-                }
+                SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.id_map);
+                mapFragment.getMapAsync(MainActivity.this);
             }
         });
     }
