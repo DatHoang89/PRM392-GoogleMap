@@ -45,7 +45,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     FusedLocationProviderClient fusedLocationProviderClient;
     private GoogleMap myMap;
     //    private SearchView searchView;
-    private EditText latitudeInput;
+    private EditText searchInput;
     private EditText longitudeInput;
     private TextView resultText;
     ArrayList markerPoints = new ArrayList();
@@ -57,15 +57,22 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
         getLastLocation();
         ViewMapByType();
-        latitudeInput = findViewById(R.id.latitude_input);
-        longitudeInput = findViewById(R.id.longitude_input);
+        searchInput = findViewById(R.id.search_input);
+        //longitudeInput = findViewById(R.id.longitude_input);
         Button submitButton = findViewById(R.id.btnSubmit);
-        resultText = findViewById(R.id.txtResulst);
+        resultText = findViewById(R.id.txtResult);
         submitButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String latStr = latitudeInput.getText().toString();
-                String lonStr = longitudeInput.getText().toString();
+                String search = searchInput.getText().toString();
+                String[] ltnlng = search.split(",");
+                if(ltnlng.length != 2){
+                    resultText.setText("Invalid position!");
+                    return;
+                }
+                String latStr = ltnlng[0].trim();
+                String lonStr = ltnlng[1].trim();
+                //String lonStr = longitudeInput.getText().toString();
                 getMapByCoordinates(latStr,lonStr);
             }
         });
