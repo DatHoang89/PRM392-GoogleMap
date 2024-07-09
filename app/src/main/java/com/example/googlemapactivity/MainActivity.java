@@ -19,19 +19,16 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
-import com.codebyashish.googledirectionapi.AbstractRouting;
-import com.codebyashish.googledirectionapi.ErrorHandling;
-import com.codebyashish.googledirectionapi.RouteDrawing;
-import com.codebyashish.googledirectionapi.RouteInfoModel;
-import com.codebyashish.googledirectionapi.RouteListener;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolygonOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.maps.model.RoundCap;
@@ -42,7 +39,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-public class MainActivity extends AppCompatActivity implements OnMapReadyCallback , RouteListener {
+public class MainActivity extends AppCompatActivity implements OnMapReadyCallback{
     private final int FINE_PERMISSION_CODE = 1;
     Location currentLocation;
     FusedLocationProviderClient fusedLocationProviderClient;
@@ -51,7 +48,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private EditText latitudeInput;
     private EditText longitudeInput;
     private TextView resultText;
-    private LatLng destinationLocation;
+    ArrayList markerPoints = new ArrayList();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -104,16 +101,32 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         myMap.getUiSettings().setZoomControlsEnabled(true);
         myMap.getUiSettings().setCompassEnabled(true);
+        markerPoints.add(myLocation);
         myMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(@NonNull LatLng latLng) {
-                myMap.clear();
-                destinationLocation = latLng;
-                MarkerOptions markerOptions = new MarkerOptions();
-                markerOptions.position(latLng);
-                markerOptions.icon(Utils.bitmapDescriptorFromVector(MainActivity.this, R.drawable.location_foreground));
-                myMap.addMarker(markerOptions);
-                getRoutePoints(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude()), latLng);
+                if(markerPoints.size() > 1){
+                    myMap.clear();
+                    markerPoints.clear();
+                    return;
+                }
+
+                markerPoints.add(latLng);
+                MarkerOptions option = new MarkerOptions().position(latLng);
+                if(markerPoints.size() == 1){
+                    option.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
+                }else if(markerPoints.size() == 2){
+                    option.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+                }
+
+                myMap.addMarker(option);
+
+                if(markerPoints.size() > 1 ) {
+                    myMap.addPolygon(new PolygonOptions()
+                            .add((LatLng) markerPoints.get(0), (LatLng) markerPoints.get(1))
+                            .fillColor(Color.BLACK)
+                    );
+                }
             }
         });
 
@@ -202,46 +215,5 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         });
     }
 
-    public void getRoutePoints(LatLng start, LatLng end) {
-            RouteDrawing routeDrawing = new RouteDrawing.Builder()
-                    .context(MainActivity.this)
-                    .travelMode(AbstractRouting.TravelMode.DRIVING)
-                    .withListener(this).alternativeRoutes(true)
-                    .waypoints(start, end)
-                    .build();
-            routeDrawing.execute();
-    }
 
-    @Override
-    public void onRouteFailure(ErrorHandling e) {
-        Log.w("TAG", "onRoutingFailure: " + e);
-    }
-
-    @Override
-    public void onRouteStart() {
-        Log.d("TAG", "yes started");
-    }
-
-    @Override
-    public void onRouteSuccess(ArrayList<RouteInfoModel> list, int indexing) {
-        PolylineOptions polylineOptions = new PolylineOptions();
-        ArrayList<Polyline> polylines = new ArrayList<>();
-        for (int i = 0; i < list.size(); i++) {
-            if (i == indexing) {
-//                Log.e("TAG", "onRoutingSuccess: routeIndexing" + routeIndexing);
-                polylineOptions.color(Color.BLACK);
-                polylineOptions.width(12);
-                polylineOptions.addAll(list.get(indexing).getPoints());
-                polylineOptions.startCap(new RoundCap());
-                polylineOptions.endCap(new RoundCap());
-                Polyline polyline = myMap.addPolyline(polylineOptions);
-                polylines.add(polyline);
-            }
-        }
-    }
-
-    @Override
-    public void onRouteCancelled() {
-        Log.d("TAG", "route canceled");
-    }
 }

@@ -29,7 +29,6 @@ android {
 }
 
 dependencies {
-    implementation ("com.github.dangiashish:Google-Direction-Api:1.6")
     implementation(libs.appcompat)
     implementation(libs.material)
     implementation(libs.activity)
